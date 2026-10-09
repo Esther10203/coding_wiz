@@ -1,0 +1,28 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  /* TODO: font-family, background, color, line-height */
+}
+
+header {
+  /* TODO: background colour, padding, text-align */
+}
+
+nav a {
+  /* TODO: colour, remove the underline (text-decoration: none) */
+}
+
+nav a:hover {
+  /* TODO: hover colour */
+}
+
+section {
+  /* TODO: turn each section into a card (exercise 3.2) */
+}
+
+footer {
+  /* TODO: centred, small text, padding */
+}

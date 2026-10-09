@@ -1,0 +1,12 @@
+---
+description: Docs first
+alwaysApply: true
+---
+
+# Docs first
+
+Before creating or editing any lesson, slides, practice, or homework:
+
+1. Read `docs/curriculum.md` (the Friday schedule and topics).
+2. Read the previous session in `sessions/` so the new one builds on it.
+3. Keep the curriculum and the session folders in sync. If a session's topic or homework changes, update `docs/curriculum.md`.

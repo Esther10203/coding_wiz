@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧙 Coding Wizards</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #1e1b2e;
+      color: #ece9f7;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0 0 56px 0;
+      display: none;
+      overflow-y: auto;
+      padding: 48px 7vw;
+    }
+    .slide.active { display: block; animation: fade 0.25s ease; }
+    .slide.title { display: none; }
+    .slide.title.active { display: flex; align-items: center; justify-content: center; text-align: center; }
+    @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .content { max-width: 1100px; margin: 0 auto; font-size: clamp(18px, 1.6vw, 26px); line-height: 1.5; }
+    .slide[data-part="practice"] { background: #17222e; }
+
+    h1 { font-size: 2.2em; margin: 0 0 0.4em; color: #c4b5fd; }
+    h2 { font-size: 1.6em; margin: 0.2em 0 0.5em; color: #c4b5fd; }
+    h3 { font-size: 1.3em; margin: 0.2em 0 0.5em; color: #f9a8d4; }
+    .title h1 { font-size: 3em; }
+    .title h2, .title h3 { color: #ece9f7; font-weight: 400; }
+    .title .content > h2:first-child { font-size: 2.6em; font-weight: 700; }
+    .slide[data-part="practice"] h2, .slide[data-part="practice"] h3 { color: #7dd3fc; }
+
+    a { color: #f9a8d4; }
+    strong { color: #fff; }
+    ul, ol { padding-left: 1.3em; }
+    li { margin: 0.25em 0; }
+
+    code {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      background: #332e4d;
+      padding: 0.1em 0.35em;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #0f0d18;
+      border: 1px solid #332e4d;
+      border-radius: 12px;
+      padding: 18px 22px;
+      overflow-x: auto;
+      font-size: 0.8em;
+      line-height: 1.45;
+    }
+    pre code { background: none; padding: 0; color: #e2e8f0; }
+
+    /* Code + live result side by side */
+    .demo {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+      margin: 0.6em 0;
+    }
+    .demo pre { margin: 0; font-size: 0.72em; }
+    .result {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+    .result-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: #e5e7eb;
+      color: #555;
+      font-size: 13px;
+    }
+    .result-bar i { width: 11px; height: 11px; border-radius: 50%; background: #f87171; }
+    .result-bar i:nth-child(2) { background: #fbbf24; }
+    .result-bar i:nth-child(3) { background: #4ade80; }
+    .result-bar span { margin-left: 8px; }
+    .preview { display: block; width: 100%; height: 120px; border: 0; background: #fff; }
+    @media (max-width: 900px) { .demo { grid-template-columns: 1fr; } }
+
+    .content img {
+      display: block;
+      max-width: 100%;
+      max-height: 58vh;
+      margin: 0.5em auto;
+      object-fit: contain;
+      border-radius: 16px;
+    }
+
+    table { border-collapse: collapse; margin: 0.6em 0; }
+    th, td { border: 1px solid #3b3561; padding: 0.4em 0.9em; text-align: left; }
+    th { background: #2a2640; color: #c4b5fd; }
+
+    blockquote {
+      margin: 0.8em 0;
+      padding: 0.6em 1.2em;
+      border-left: 5px solid #a78bfa;
+      background: #2a2640;
+      border-radius: 0 10px 10px 0;
+    }
+    blockquote p { margin: 0.3em 0; }
+
+    details {
+      background: #22324a;
+      border-radius: 10px;
+      padding: 0.6em 1em;
+      margin: 0.8em 0;
+    }
+    summary { cursor: pointer; font-weight: 600; color: #7dd3fc; }
+
+    /* Bottom bar */
+    .bar {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      background: #15131f;
+      border-top: 1px solid #2a2640;
+      font-size: 15px;
+    }
+    .bar button {
+      background: #2a2640;
+      color: #ece9f7;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .bar button:hover { background: #3b3561; }
+    .bar button.current { background: #a78bfa; color: #15131f; }
+    .bar .spacer { flex: 1; }
+    .progress {
+      position: fixed;
+      left: 0; bottom: 56px;
+      height: 3px;
+      background: linear-gradient(90deg, #a78bfa, #f472b6);
+      transition: width 0.25s;
+    }
+
+    /* Exercise timer */
+    .timer {
+      position: fixed;
+      top: 18px; right: 22px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: #22324a;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-variant-numeric: tabular-nums;
+      font-size: 22px;
+      z-index: 2;
+    }
+    .timer.show { display: flex; }
+    .timer.done { background: #7f1d1d; animation: pulse 1s infinite; }
+    @keyframes pulse { 50% { opacity: 0.6; } }
+    .timer button {
+      background: #7dd3fc;
+      color: #0f172a;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .help {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 3;
+    }
+    .help.show { display: flex; }
+    .help div { background: #2a2640; padding: 30px 40px; border-radius: 16px; line-height: 2; }
+  </style>
+</head>
+<body>
+
+<section class="slide title" data-part="lesson"><div class="content"><h1>🧙 Coding Wizards</h1>
+<h2>Session 1: HTML and CSS</h2>
+<h3>Friday, 9 October 2026</h3>
+<p><img src="images/hero-wizard.jpg" alt="A young wizard coding on a laptop"></p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Today&#39;s plan</h1>
+<table>
+<thead>
+<tr>
+<th>Time</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0:00</td>
+<td>⌨️ Typing practice</td>
+</tr>
+<tr>
+<td>0:25</td>
+<td>Recap: Figma (last time)</td>
+</tr>
+<tr>
+<td>0:35</td>
+<td>📖 HTML: beginner → expert</td>
+</tr>
+<tr>
+<td>0:55</td>
+<td>🎨 CSS basics</td>
+</tr>
+<tr>
+<td>1:05</td>
+<td>🛠️ Build your About Me page</td>
+</tr>
+<tr>
+<td>1:20</td>
+<td>Wrap-up and homework</td>
+</tr>
+</tbody></table>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Last time: Figma 🎨</h1>
+<ul>
+<li>Figma = <strong>the plan</strong> (what it looks like)</li>
+<li>HTML + CSS = <strong>the build</strong> (making it real)</li>
+</ul>
+<blockquote>
+<p>A designer draws the house. A developer builds it.</p>
+</blockquote>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>How a website works</h1>
+<p><img src="images/house-html-css-js.jpg" alt="HTML is the frame of a house, CSS is the paint and garden, JavaScript is the lights and doorbell"></p>
+<p><strong>HTML</strong> = structure · <strong>CSS</strong> = style · <strong>JavaScript</strong> = behaviour. Today: <strong>HTML + CSS</strong></p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Why learn this if AI writes code?</h1>
+<ul>
+<li>AI writes HTML in seconds, but <strong>you</strong> have to check it</li>
+<li>If you can&#39;t read it, you can&#39;t fix it</li>
+<li>Good prompts come from knowing the right words: &quot;make the <code>nav</code> sticky&quot;, &quot;use a <code>grid</code>&quot;</li>
+</ul>
+<blockquote>
+<p><strong>Vibe coding = you are the director. The AI is the crew.</strong></p>
+</blockquote>
+</div></section>
+<section class="slide title" data-part="lesson"><div class="content"><!-- LEVEL 1 --><h1>🟢 LEVEL 1: Beginner</h1>
+<h2>Your first web page</h2>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Tools you need</h1>
+<ul>
+<li>A <strong>code editor</strong>: VS Code or Cursor (free)</li>
+<li>A <strong>browser</strong>: Chrome, Edge, Firefox, or Safari</li>
+<li>That&#39;s it. No internet needed to build a page.</li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Make a folder: <code>my-site</code></li>
+<li>Create a file: <code>index.html</code></li>
+<li>Open it in the browser (double-click the file)</li>
+</ol>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>What is a tag?</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;p&gt;Hello, I am a paragraph.&lt;/p&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;p&gt;Hello, I am a paragraph.&lt;/p&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><ul>
+<li><code>&lt;p&gt;</code> is the <strong>opening tag</strong></li>
+<li><code>&lt;/p&gt;</code> is the <strong>closing tag</strong> (note the <code>/</code>)</li>
+<li>The text in between is the <strong>content</strong></li>
+<li>All of it together is an <strong>element</strong></li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Your first page</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;My First Page&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello, world!&lt;/h1&gt;
+    &lt;p&gt;This is my first web page.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;My First Page&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello, world!&lt;/h1&gt;
+    &lt;p&gt;This is my first web page.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>💡 In VS Code, type <code>!</code> and press <strong>Tab</strong> to get this for free.</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>The page skeleton explained</h1>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;!DOCTYPE html&gt;</code></td>
+<td>&quot;This is a modern HTML page&quot;</td>
+</tr>
+<tr>
+<td><code>&lt;html lang=&quot;en&quot;&gt;</code></td>
+<td>The root. Everything goes inside it</td>
+</tr>
+<tr>
+<td><code>&lt;head&gt;</code></td>
+<td>Hidden info: title, settings, links to CSS</td>
+</tr>
+<tr>
+<td><code>&lt;title&gt;</code></td>
+<td>Text shown on the browser tab</td>
+</tr>
+<tr>
+<td><code>&lt;body&gt;</code></td>
+<td><strong>Everything you see on the page</strong></td>
+</tr>
+</tbody></table>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Headings</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;h1&gt;Main title&lt;/h1&gt;
+&lt;h2&gt;Section title&lt;/h2&gt;
+&lt;h3&gt;Sub-section&lt;/h3&gt;
+&lt;h4&gt;Smaller&lt;/h4&gt;
+&lt;h5&gt;Even smaller&lt;/h5&gt;
+&lt;h6&gt;Smallest&lt;/h6&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;h1&gt;Main title&lt;/h1&gt;
+&lt;h2&gt;Section title&lt;/h2&gt;
+&lt;h3&gt;Sub-section&lt;/h3&gt;
+&lt;h4&gt;Smaller&lt;/h4&gt;
+&lt;h5&gt;Even smaller&lt;/h5&gt;
+&lt;h6&gt;Smallest&lt;/h6&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><ul>
+<li>Use <strong>one <code>&lt;h1&gt;</code> per page</strong></li>
+<li>Don&#39;t skip levels (no jumping from <code>h1</code> to <code>h4</code>)</li>
+<li>Headings describe <strong>structure</strong>, not size. CSS controls size.</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Text</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;p&gt;A paragraph of text.&lt;/p&gt;
+&lt;p&gt;This is &lt;strong&gt;important&lt;/strong&gt; and this is &lt;em&gt;emphasised&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Line one&lt;br&gt;Line two&lt;/p&gt;
+&lt;hr&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;p&gt;A paragraph of text.&lt;/p&gt;
+&lt;p&gt;This is &lt;strong&gt;important&lt;/strong&gt; and this is &lt;em&gt;emphasised&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Line one&lt;br&gt;Line two&lt;/p&gt;
+&lt;hr&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;p&gt;</code></td>
+<td>Paragraph</td>
+</tr>
+<tr>
+<td><code>&lt;strong&gt;</code></td>
+<td>Important (shown bold)</td>
+</tr>
+<tr>
+<td><code>&lt;em&gt;</code></td>
+<td>Emphasis (shown italic)</td>
+</tr>
+<tr>
+<td><code>&lt;br&gt;</code></td>
+<td>Line break (no closing tag)</td>
+</tr>
+<tr>
+<td><code>&lt;hr&gt;</code></td>
+<td>Horizontal divider line</td>
+</tr>
+</tbody></table>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Links</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;a href=&quot;https://google.com&quot;&gt;Go to Google&lt;/a&gt;
+&lt;br&gt;
+&lt;a href=&quot;https://youtube.com&quot; target=&quot;_blank&quot;&gt;Opens in new tab&lt;/a&gt;
+&lt;br&gt;
+&lt;a href=&quot;mailto:me@email.com&quot;&gt;Email me&lt;/a&gt;
+&lt;br&gt;
+&lt;a href=&quot;#contact&quot;&gt;Jump to contact section&lt;/a&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;a href=&quot;https://google.com&quot;&gt;Go to Google&lt;/a&gt;
+&lt;br&gt;
+&lt;a href=&quot;https://youtube.com&quot; target=&quot;_blank&quot;&gt;Opens in new tab&lt;/a&gt;
+&lt;br&gt;
+&lt;a href=&quot;mailto:me@email.com&quot;&gt;Email me&lt;/a&gt;
+&lt;br&gt;
+&lt;a href=&quot;#contact&quot;&gt;Jump to contact section&lt;/a&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><ul>
+<li><code>href</code> = where the link goes</li>
+<li><code>href</code> is an <strong>attribute</strong>: extra info written inside the opening tag</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Images</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;img src=&quot;https://picsum.photos/id/1025/300/200&quot;
+     alt=&quot;A pug wrapped in a blanket&quot;&gt;
+
+&lt;img src=&quot;missing.jpg&quot; alt=&quot;This photo failed to load&quot;&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;img src=&quot;https://picsum.photos/id/1025/300/200&quot;
+     alt=&quot;A pug wrapped in a blanket&quot;&gt;
+
+&lt;img src=&quot;missing.jpg&quot; alt=&quot;This photo failed to load&quot;&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><ul>
+<li><code>src</code> = the image file or URL</li>
+<li><code>alt</code> = a description for blind users and for when the image fails to load. <strong>Always write one.</strong></li>
+<li><code>&lt;img&gt;</code> has <strong>no closing tag</strong></li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>File paths</h1>
+<pre><code>my-site/
+├── index.html
+├── about.html
+└── images/
+    └── me.jpg
+</code></pre>
+<p>From <code>index.html</code>:</p>
+<pre><code class="language-html">&lt;a href=&quot;about.html&quot;&gt;About&lt;/a&gt;
+&lt;img src=&quot;images/me.jpg&quot; alt=&quot;Me&quot;&gt;
+</code></pre>
+<ul>
+<li><code>images/me.jpg</code>: go into the <code>images</code> folder</li>
+<li><code>../</code>: go <strong>up</strong> one folder</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Lists</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;!-- Unordered (bullets) --&gt;
+&lt;ul&gt;
+  &lt;li&gt;Pizza&lt;/li&gt;
+  &lt;li&gt;Sushi&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- Ordered (numbers) --&gt;
+&lt;ol&gt;
+  &lt;li&gt;Wake up&lt;/li&gt;
+  &lt;li&gt;Code&lt;/li&gt;
+  &lt;li&gt;Sleep&lt;/li&gt;
+&lt;/ol&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;!-- Unordered (bullets) --&gt;
+&lt;ul&gt;
+  &lt;li&gt;Pizza&lt;/li&gt;
+  &lt;li&gt;Sushi&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- Ordered (numbers) --&gt;
+&lt;ol&gt;
+  &lt;li&gt;Wake up&lt;/li&gt;
+  &lt;li&gt;Code&lt;/li&gt;
+  &lt;li&gt;Sleep&lt;/li&gt;
+&lt;/ol&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p><code>&lt;!-- this is a comment --&gt;</code>: the browser ignores it</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Nesting</h1>
+<p>Tags go <strong>inside</strong> other tags, like boxes in boxes:</p>
+<div class="demo">
+<pre><code class="language-html">&lt;ul&gt;
+  &lt;li&gt;Fruits
+    &lt;ul&gt;
+      &lt;li&gt;Apple&lt;/li&gt;
+      &lt;li&gt;Mango&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;ul&gt;
+  &lt;li&gt;Fruits
+    &lt;ul&gt;
+      &lt;li&gt;Apple&lt;/li&gt;
+      &lt;li&gt;Mango&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>✅ <code>&lt;p&gt;&lt;strong&gt;Hi&lt;/strong&gt;&lt;/p&gt;</code>
+❌ <code>&lt;p&gt;&lt;strong&gt;Hi&lt;/p&gt;&lt;/strong&gt;</code>: close tags in reverse order</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>🛠️ Try it (2 min)</h1>
+<p>Make a page with:</p>
+<ul>
+<li>An <code>&lt;h1&gt;</code> with your name</li>
+<li>A <code>&lt;p&gt;</code> about you</li>
+<li>An <code>&lt;img&gt;</code> (use <code>https://picsum.photos/300</code>)</li>
+<li>A <code>&lt;ul&gt;</code> of 3 hobbies</li>
+<li>An <code>&lt;a&gt;</code> to your favourite website</li>
+</ul>
+</div></section>
+<section class="slide title" data-part="lesson"><div class="content"><!-- LEVEL 2 --><h1>🟡 LEVEL 2: Intermediate</h1>
+<h2>Structure, tables, and forms</h2>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Block vs inline elements</h1>
+<table>
+<thead>
+<tr>
+<th>Block</th>
+<th>Inline</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Starts on a new line, takes the full width</td>
+<td>Sits inside a line of text</td>
+</tr>
+<tr>
+<td><code>&lt;div&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;h1&gt;</code>, <code>&lt;ul&gt;</code>, <code>&lt;section&gt;</code></td>
+<td><code>&lt;span&gt;</code>, <code>&lt;a&gt;</code>, <code>&lt;strong&gt;</code>, <code>&lt;img&gt;</code></td>
+</tr>
+</tbody></table>
+<div class="demo">
+<pre><code class="language-html">&lt;div&gt;I am a block box&lt;/div&gt;
+&lt;p&gt;I am text with a &lt;span&gt;span inside&lt;/span&gt;.&lt;/p&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;div&gt;I am a block box&lt;/div&gt;
+&lt;p&gt;I am text with a &lt;span&gt;span inside&lt;/span&gt;.&lt;/p&gt;
+
+&lt;style&gt;div, p { outline: 2px dashed #a78bfa; } span { background: #fde68a; }&lt;/style&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p><em>(The dashed lines show the size of each box. They&#39;re only there for this demo.)</em></p>
+<ul>
+<li><code>&lt;div&gt;</code> = a generic box for grouping</li>
+<li><code>&lt;span&gt;</code> = a generic inline wrapper</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Attributes</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;p id=&quot;intro&quot; class=&quot;big highlight&quot; title=&quot;Hover text&quot;&gt;Hover over me 👋&lt;/p&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;p id=&quot;intro&quot; class=&quot;big highlight&quot; title=&quot;Hover text&quot;&gt;Hover over me 👋&lt;/p&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>A <strong>unique</strong> name (only one per page)</td>
+</tr>
+<tr>
+<td><code>class</code></td>
+<td>A <strong>reusable</strong> label for styling (can use many)</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>Tooltip shown on hover</td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td>Inline CSS (avoid it, use a CSS file instead)</td>
+</tr>
+</tbody></table>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Semantic HTML: tags with meaning</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;header&gt;Logo and title&lt;/header&gt;
+&lt;nav&gt;Menu links&lt;/nav&gt;
+&lt;main&gt;
+  &lt;section&gt;A themed group of content&lt;/section&gt;
+  &lt;article&gt;A blog post or card&lt;/article&gt;
+  &lt;aside&gt;Sidebar&lt;/aside&gt;
+&lt;/main&gt;
+&lt;footer&gt;© 2026 Me&lt;/footer&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;header&gt;Logo and title&lt;/header&gt;
+&lt;nav&gt;Menu links&lt;/nav&gt;
+&lt;main&gt;
+  &lt;section&gt;A themed group of content&lt;/section&gt;
+  &lt;article&gt;A blog post or card&lt;/article&gt;
+  &lt;aside&gt;Sidebar&lt;/aside&gt;
+&lt;/main&gt;
+&lt;footer&gt;© 2026 Me&lt;/footer&gt;
+
+&lt;style&gt;
+  header, nav, main, section, article, aside, footer { display: block; padding: 8px; margin: 4px; border-radius: 6px; }
+  header { background: #c4b5fd; } nav { background: #f9a8d4; } main { background: #e5e7eb; }
+  section { background: #bae6fd; } article { background: #bbf7d0; } aside { background: #fde68a; } footer { background: #d1d5db; }
+&lt;/style&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p><strong>Why?</strong> Screen readers, Google, and other developers (and AI!) understand your page better.</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Semantic layout picture</h1>
+<pre><code>┌──────────────── header ────────────────┐
+│ logo            nav: Home About Contact│
+├────────────────────────────────────────┤
+│ main                                   │
+│  ┌─── section ────────┐ ┌── aside ──┐  │
+│  │ article  article   │ │ sidebar   │  │
+│  └────────────────────┘ └───────────┘  │
+├──────────────── footer ────────────────┤
+│ © 2026                                 │
+└────────────────────────────────────────┘
+</code></pre>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>A navigation menu</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;header&gt;
+  &lt;h1&gt;Esther's Site&lt;/h1&gt;
+  &lt;nav&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;index.html&quot;&gt;Home&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;about.html&quot;&gt;About&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#contact&quot;&gt;Contact&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;header&gt;
+  &lt;h1&gt;Esther's Site&lt;/h1&gt;
+  &lt;nav&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;index.html&quot;&gt;Home&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;about.html&quot;&gt;About&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#contact&quot;&gt;Contact&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div></div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Tables</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;WPM&lt;/th&gt;&lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;&lt;td&gt;Esther&lt;/td&gt;&lt;td&gt;65&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Sam&lt;/td&gt;&lt;td&gt;40&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;WPM&lt;/th&gt;&lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;&lt;td&gt;Esther&lt;/td&gt;&lt;td&gt;65&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Sam&lt;/td&gt;&lt;td&gt;40&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;style&gt;table { border-collapse: collapse; } th, td { border: 1px solid #ccc; padding: 6px 14px; }&lt;/style&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p><em>(Plain tables have no borders. The demo adds a little CSS so you can see the cells.)</em></p>
+<ul>
+<li><code>tr</code> = row, <code>th</code> = header cell, <code>td</code> = data cell</li>
+<li>Use tables for <strong>data only</strong>, never for page layout</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Forms: collecting input</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;form action=&quot;/send&quot; method=&quot;POST&quot;&gt;
+  &lt;label for=&quot;name&quot;&gt;Name&lt;/label&gt;
+  &lt;input id=&quot;name&quot; name=&quot;name&quot; type=&quot;text&quot; required&gt;
+
+  &lt;label for=&quot;email&quot;&gt;Email&lt;/label&gt;
+  &lt;input id=&quot;email&quot; name=&quot;email&quot; type=&quot;email&quot;&gt;
+
+  &lt;label for=&quot;msg&quot;&gt;Message&lt;/label&gt;
+  &lt;textarea id=&quot;msg&quot; name=&quot;msg&quot;&gt;&lt;/textarea&gt;
+
+  &lt;button type=&quot;submit&quot;&gt;Send&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;form action=&quot;/send&quot; method=&quot;POST&quot;&gt;
+  &lt;label for=&quot;name&quot;&gt;Name&lt;/label&gt;
+  &lt;input id=&quot;name&quot; name=&quot;name&quot; type=&quot;text&quot; required&gt;
+
+  &lt;label for=&quot;email&quot;&gt;Email&lt;/label&gt;
+  &lt;input id=&quot;email&quot; name=&quot;email&quot; type=&quot;email&quot;&gt;
+
+  &lt;label for=&quot;msg&quot;&gt;Message&lt;/label&gt;
+  &lt;textarea id=&quot;msg&quot; name=&quot;msg&quot;&gt;&lt;/textarea&gt;
+
+  &lt;button type=&quot;submit&quot;&gt;Send&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;style&gt;label, input, textarea, button { display: block; margin: 4px 0 10px; }&lt;/style&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p><code>&lt;label for=&quot;x&quot;&gt;</code> connects to <code>id=&quot;x&quot;</code>: click a label in the result and watch the box get focus. Try sending it empty!</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Input types</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;label&gt;Text &lt;input type=&quot;text&quot;&gt;&lt;/label&gt;
+&lt;label&gt;Password &lt;input type=&quot;password&quot;&gt;&lt;/label&gt;
+&lt;label&gt;Number &lt;input type=&quot;number&quot; min=&quot;1&quot; max=&quot;10&quot;&gt;&lt;/label&gt;
+&lt;label&gt;Date &lt;input type=&quot;date&quot;&gt;&lt;/label&gt;
+&lt;label&gt;Colour &lt;input type=&quot;color&quot;&gt;&lt;/label&gt;
+&lt;label&gt;Range &lt;input type=&quot;range&quot;&gt;&lt;/label&gt;
+&lt;label&gt;File &lt;input type=&quot;file&quot;&gt;&lt;/label&gt;
+&lt;label&gt;&lt;input type=&quot;checkbox&quot;&gt; I agree&lt;/label&gt;
+&lt;label&gt;&lt;input type=&quot;radio&quot; name=&quot;size&quot;&gt; Small&lt;/label&gt;
+&lt;label&gt;&lt;input type=&quot;radio&quot; name=&quot;size&quot;&gt; Large&lt;/label&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;label&gt;Text &lt;input type=&quot;text&quot;&gt;&lt;/label&gt;
+&lt;label&gt;Password &lt;input type=&quot;password&quot;&gt;&lt;/label&gt;
+&lt;label&gt;Number &lt;input type=&quot;number&quot; min=&quot;1&quot; max=&quot;10&quot;&gt;&lt;/label&gt;
+&lt;label&gt;Date &lt;input type=&quot;date&quot;&gt;&lt;/label&gt;
+&lt;label&gt;Colour &lt;input type=&quot;color&quot;&gt;&lt;/label&gt;
+&lt;label&gt;Range &lt;input type=&quot;range&quot;&gt;&lt;/label&gt;
+&lt;label&gt;File &lt;input type=&quot;file&quot;&gt;&lt;/label&gt;
+&lt;label&gt;&lt;input type=&quot;checkbox&quot;&gt; I agree&lt;/label&gt;
+&lt;label&gt;&lt;input type=&quot;radio&quot; name=&quot;size&quot;&gt; Small&lt;/label&gt;
+&lt;label&gt;&lt;input type=&quot;radio&quot; name=&quot;size&quot;&gt; Large&lt;/label&gt;
+
+&lt;style&gt;label { display: block; margin: 8px 0; }&lt;/style&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>On phones, <code>email</code> and <code>number</code> open the right keyboard automatically ✨</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>More form elements</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;select name=&quot;country&quot;&gt;
+  &lt;option value=&quot;my&quot;&gt;Malaysia&lt;/option&gt;
+  &lt;option value=&quot;sg&quot;&gt;Singapore&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;fieldset&gt;
+  &lt;legend&gt;Choose a plan&lt;/legend&gt;
+  &lt;input type=&quot;radio&quot; id=&quot;free&quot; name=&quot;plan&quot;&gt;&lt;label for=&quot;free&quot;&gt;Free&lt;/label&gt;
+  &lt;input type=&quot;radio&quot; id=&quot;pro&quot; name=&quot;plan&quot;&gt;&lt;label for=&quot;pro&quot;&gt;Pro&lt;/label&gt;
+&lt;/fieldset&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;select name=&quot;country&quot;&gt;
+  &lt;option value=&quot;my&quot;&gt;Malaysia&lt;/option&gt;
+  &lt;option value=&quot;sg&quot;&gt;Singapore&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;fieldset&gt;
+  &lt;legend&gt;Choose a plan&lt;/legend&gt;
+  &lt;input type=&quot;radio&quot; id=&quot;free&quot; name=&quot;plan&quot;&gt;&lt;label for=&quot;free&quot;&gt;Free&lt;/label&gt;
+  &lt;input type=&quot;radio&quot; id=&quot;pro&quot; name=&quot;plan&quot;&gt;&lt;label for=&quot;pro&quot;&gt;Pro&lt;/label&gt;
+&lt;/fieldset&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div></div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Built-in validation (no JavaScript!)</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;form&gt;
+  &lt;input type=&quot;email&quot; placeholder=&quot;Email&quot; required&gt;
+  &lt;input type=&quot;number&quot; placeholder=&quot;Age 18–99&quot; min=&quot;18&quot; max=&quot;99&quot;&gt;
+  &lt;input type=&quot;text&quot; pattern=&quot;[0-9]{5}&quot; placeholder=&quot;5-digit postcode&quot;&gt;
+  &lt;button&gt;Submit&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;form&gt;
+  &lt;input type=&quot;email&quot; placeholder=&quot;Email&quot; required&gt;
+  &lt;input type=&quot;number&quot; placeholder=&quot;Age 18–99&quot; min=&quot;18&quot; max=&quot;99&quot;&gt;
+  &lt;input type=&quot;text&quot; pattern=&quot;[0-9]{5}&quot; placeholder=&quot;5-digit postcode&quot;&gt;
+  &lt;button&gt;Submit&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;style&gt;input, button { display: block; margin: 8px 0; }&lt;/style&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>Type something wrong and press <strong>Submit</strong>: the browser blocks the form and shows the error by itself.</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Special characters (entities)</h1>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Shows</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&amp;lt;</code></td>
+<td>&lt;</td>
+</tr>
+<tr>
+<td><code>&amp;gt;</code></td>
+<td>&gt;</td>
+</tr>
+<tr>
+<td><code>&amp;amp;</code></td>
+<td>&amp;</td>
+</tr>
+<tr>
+<td><code>&amp;copy;</code></td>
+<td>©</td>
+</tr>
+<tr>
+<td><code>&amp;nbsp;</code></td>
+<td>non-breaking space</td>
+</tr>
+</tbody></table>
+<div class="demo">
+<pre><code class="language-html">&lt;p&gt;5 &amp;lt; 10 &amp;amp; 10 &amp;gt; 5&lt;/p&gt;
+&lt;p&gt;&amp;copy; 2026 Coding Wizards. I love coding 🚀&lt;/p&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;p&gt;5 &amp;lt; 10 &amp;amp; 10 &amp;gt; 5&lt;/p&gt;
+&lt;p&gt;&amp;copy; 2026 Coding Wizards. I love coding 🚀&lt;/p&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div></div></section>
+<section class="slide title" data-part="lesson"><div class="content"><!-- LEVEL 3 --><h1>🟠 LEVEL 3: Advanced</h1>
+<h2>Media, the head, and accessibility</h2>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Video and audio</h1>
+<pre><code class="language-html">&lt;video src=&quot;intro.mp4&quot; controls width=&quot;400&quot; poster=&quot;thumb.jpg&quot;&gt;&lt;/video&gt;
+
+&lt;audio src=&quot;song.mp3&quot; controls&gt;&lt;/audio&gt;
+</code></pre>
+<p>Embedding YouTube or Google Maps:</p>
+<pre><code class="language-html">&lt;iframe width=&quot;560&quot; height=&quot;315&quot;
+  src=&quot;https://www.youtube.com/embed/VIDEO_ID&quot;
+  title=&quot;YouTube video&quot; allowfullscreen&gt;&lt;/iframe&gt;
+</code></pre>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Figures and captions</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;figure&gt;
+  &lt;img src=&quot;https://picsum.photos/id/0/320/180&quot;
+       alt=&quot;A laptop on a wooden desk&quot;&gt;
+  &lt;figcaption&gt;Where the magic happens&lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;blockquote&gt;Code is like humour. &lt;mark&gt;Explain it&lt;/mark&gt; and it's bad.&lt;/blockquote&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;figure&gt;
+  &lt;img src=&quot;https://picsum.photos/id/0/320/180&quot;
+       alt=&quot;A laptop on a wooden desk&quot;&gt;
+  &lt;figcaption&gt;Where the magic happens&lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;blockquote&gt;Code is like humour. &lt;mark&gt;Explain it&lt;/mark&gt; and it's bad.&lt;/blockquote&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>Other meaningful text tags:
+<code>&lt;blockquote&gt;</code>, <code>&lt;code&gt;</code>, <code>&lt;pre&gt;</code>, <code>&lt;mark&gt;</code>, <code>&lt;time datetime=&quot;2026-10-09&quot;&gt;</code>, <code>&lt;abbr title=&quot;HyperText Markup Language&quot;&gt;HTML&lt;/abbr&gt;</code></p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>The <code>&lt;head&gt;</code>: hidden but important</h1>
+<pre><code class="language-html">&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+  &lt;title&gt;Esther | Developer&lt;/title&gt;
+  &lt;meta name=&quot;description&quot; content=&quot;My personal portfolio&quot;&gt;
+  &lt;link rel=&quot;icon&quot; href=&quot;favicon.png&quot;&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;
+&lt;/head&gt;
+</code></pre>
+<ul>
+<li><code>viewport</code> = <strong>needed for phones</strong> (otherwise the page looks tiny)</li>
+<li><code>description</code> = the text Google shows under your link</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>SEO and social sharing</h1>
+<pre><code class="language-html">&lt;meta property=&quot;og:title&quot; content=&quot;Esther&#39;s Portfolio&quot;&gt;
+&lt;meta property=&quot;og:description&quot; content=&quot;I build websites&quot;&gt;
+&lt;meta property=&quot;og:image&quot; content=&quot;https://mysite.com/preview.jpg&quot;&gt;
+</code></pre>
+<p>This makes your link show a nice preview card in WhatsApp, Instagram, and Discord 📱</p>
+<p><strong>SEO tips:</strong> one <code>h1</code>, meaningful headings, <code>alt</code> text, a good <code>title</code>, fast pages</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Accessibility (a11y)</h1>
+<p>Websites should work for <strong>everyone</strong>, including blind users, keyboard-only users, and people with poor eyesight.</p>
+<p>✅ <code>alt</code> on every image
+✅ <code>&lt;label&gt;</code> for every input
+✅ Use <code>&lt;button&gt;</code> for actions and <code>&lt;a&gt;</code> for navigation
+✅ Semantic tags and a proper heading order
+✅ Strong colour contrast
+✅ Everything usable with the <strong>Tab</strong> key</p>
+<p>🧪 Test: unplug your mouse and try to use your site</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>ARIA (when HTML isn&#39;t enough)</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;button aria-label=&quot;Close menu&quot;&gt;✖&lt;/button&gt;
+
+&lt;div role=&quot;alert&quot;&gt;✅ Your form was sent!&lt;/div&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;button aria-label=&quot;Close menu&quot;&gt;✖&lt;/button&gt;
+
+&lt;div role=&quot;alert&quot;&gt;✅ Your form was sent!&lt;/div&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>A screen reader says &quot;Close menu, button&quot; instead of just &quot;✖&quot;.</p>
+<p><strong>Rule #1 of ARIA:</strong> don&#39;t use it if a native HTML tag already does the job.</p>
+</div></section>
+<section class="slide title" data-part="lesson"><div class="content"><!-- LEVEL 4 --><h1>🔴 LEVEL 4: Expert</h1>
+<h2>Modern HTML features</h2>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Interactive elements without JavaScript</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;details&gt;
+  &lt;summary&gt;What is HTML?&lt;/summary&gt;
+  &lt;p&gt;The language that structures web pages.&lt;/p&gt;
+&lt;/details&gt;
+
+&lt;button onclick=&quot;popup.showModal()&quot;&gt;Open popup&lt;/button&gt;
+&lt;dialog id=&quot;popup&quot;&gt;
+  &lt;p&gt;Hello! I'm a popup.&lt;/p&gt;
+  &lt;form method=&quot;dialog&quot;&gt;&lt;button&gt;Close&lt;/button&gt;&lt;/form&gt;
+&lt;/dialog&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;details&gt;
+  &lt;summary&gt;What is HTML?&lt;/summary&gt;
+  &lt;p&gt;The language that structures web pages.&lt;/p&gt;
+&lt;/details&gt;
+
+&lt;button onclick=&quot;popup.showModal()&quot;&gt;Open popup&lt;/button&gt;
+&lt;dialog id=&quot;popup&quot;&gt;
+  &lt;p&gt;Hello! I'm a popup.&lt;/p&gt;
+  &lt;form method=&quot;dialog&quot;&gt;&lt;button&gt;Close&lt;/button&gt;&lt;/form&gt;
+&lt;/dialog&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p><code>&lt;details&gt;</code> gives you an FAQ accordion with <strong>zero</strong> JavaScript. Click them in the result!</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Responsive images</h1>
+<pre><code class="language-html">&lt;img
+  src=&quot;photo-800.jpg&quot;
+  srcset=&quot;photo-400.jpg 400w, photo-800.jpg 800w, photo-1600.jpg 1600w&quot;
+  sizes=&quot;(max-width: 600px) 100vw, 50vw&quot;
+  alt=&quot;Mountain view&quot;
+  loading=&quot;lazy&quot;&gt;
+
+&lt;picture&gt;
+  &lt;source srcset=&quot;photo.webp&quot; type=&quot;image/webp&quot;&gt;
+  &lt;img src=&quot;photo.jpg&quot; alt=&quot;Mountain view&quot;&gt;
+&lt;/picture&gt;
+</code></pre>
+<ul>
+<li>Phones download small images and desktops get big ones</li>
+<li><code>loading=&quot;lazy&quot;</code> = only load the image when the user scrolls to it</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Data attributes, <code>&lt;template&gt;</code>, and more</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;button data-product-id=&quot;42&quot; data-price=&quot;9.99&quot;&gt;Buy&lt;/button&gt;
+
+&lt;p&gt;Download: &lt;progress value=&quot;70&quot; max=&quot;100&quot;&gt;&lt;/progress&gt;&lt;/p&gt;
+&lt;p&gt;Battery: &lt;meter value=&quot;0.8&quot;&gt;80%&lt;/meter&gt;&lt;/p&gt;
+
+&lt;input list=&quot;langs&quot; placeholder=&quot;Type a language…&quot;&gt;
+&lt;datalist id=&quot;langs&quot;&gt;
+  &lt;option value=&quot;HTML&quot;&gt;&lt;option value=&quot;CSS&quot;&gt;&lt;option value=&quot;JavaScript&quot;&gt;
+&lt;/datalist&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;button data-product-id=&quot;42&quot; data-price=&quot;9.99&quot;&gt;Buy&lt;/button&gt;
+
+&lt;p&gt;Download: &lt;progress value=&quot;70&quot; max=&quot;100&quot;&gt;&lt;/progress&gt;&lt;/p&gt;
+&lt;p&gt;Battery: &lt;meter value=&quot;0.8&quot;&gt;80%&lt;/meter&gt;&lt;/p&gt;
+
+&lt;input list=&quot;langs&quot; placeholder=&quot;Type a language…&quot;&gt;
+&lt;datalist id=&quot;langs&quot;&gt;
+  &lt;option value=&quot;HTML&quot;&gt;&lt;option value=&quot;CSS&quot;&gt;&lt;option value=&quot;JavaScript&quot;&gt;
+&lt;/datalist&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p><code>data-*</code> stores your own info for JavaScript to read later (Session 5).</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Graphics: SVG and canvas</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;svg width=&quot;220&quot; height=&quot;100&quot;&gt;
+  &lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; fill=&quot;purple&quot; /&gt;
+  &lt;rect x=&quot;110&quot; y=&quot;15&quot; width=&quot;90&quot; height=&quot;70&quot; rx=&quot;12&quot; fill=&quot;hotpink&quot; /&gt;
+&lt;/svg&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;svg width=&quot;220&quot; height=&quot;100&quot;&gt;
+  &lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; fill=&quot;purple&quot; /&gt;
+  &lt;rect x=&quot;110&quot; y=&quot;15&quot; width=&quot;90&quot; height=&quot;70&quot; rx=&quot;12&quot; fill=&quot;hotpink&quot; /&gt;
+&lt;/svg&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><ul>
+<li><strong>SVG</strong> = vector graphics that stay sharp at any size (great for logos and icons)</li>
+<li><strong>Canvas</strong> = drawing with JavaScript (used for games and charts)</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Performance and best practices</h1>
+<ul>
+<li>Load CSS in the <code>&lt;head&gt;</code> and scripts with <code>&lt;script src=&quot;app.js&quot; defer&gt;</code></li>
+<li>Compress images; use WebP; set <code>width</code>/<code>height</code> so the page doesn&#39;t jump while loading</li>
+<li>Use <code>loading=&quot;lazy&quot;</code> for images lower down the page</li>
+<li>Validate your code: <a href="https://validator.w3.org">validator.w3.org</a></li>
+<li>Use lowercase file names with no spaces: <code>about-me.html</code> ✅ <code>About Me.html</code> ❌</li>
+<li>Indent your code neatly (2 spaces)</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>HTML expert checklist ✅</h1>
+<ul>
+<li><input disabled="" type="checkbox"> Semantic structure (<code>header</code>, <code>nav</code>, <code>main</code>, <code>footer</code>)</li>
+<li><input disabled="" type="checkbox"> One <code>h1</code>, logical heading order</li>
+<li><input disabled="" type="checkbox"> <code>alt</code> text and labels everywhere</li>
+<li><input disabled="" type="checkbox"> Viewport, description, and favicon in the head</li>
+<li><input disabled="" type="checkbox"> Forms with the right input types and validation</li>
+<li><input disabled="" type="checkbox"> Responsive, lazy-loaded images</li>
+<li><input disabled="" type="checkbox"> Passes the W3C validator</li>
+<li><input disabled="" type="checkbox"> Works with only a keyboard</li>
+</ul>
+</div></section>
+<section class="slide title" data-part="lesson"><div class="content"><!-- CSS --><h1>🎨 CSS basics</h1>
+<h2>Making it beautiful</h2>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Three ways to add CSS</h1>
+<div class="demo">
+<pre><code class="language-html">&lt;!-- 1. Inline (avoid) --&gt;
+&lt;p style=&quot;color: red;&quot;&gt;Inline style&lt;/p&gt;
+
+&lt;!-- 2. Internal --&gt;
+&lt;style&gt;
+  .blue { color: blue; }
+&lt;/style&gt;
+&lt;p class=&quot;blue&quot;&gt;Internal style&lt;/p&gt;
+
+&lt;!-- 3. External file (best ✅) --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;!-- 1. Inline (avoid) --&gt;
+&lt;p style=&quot;color: red;&quot;&gt;Inline style&lt;/p&gt;
+
+&lt;!-- 2. Internal --&gt;
+&lt;style&gt;
+  .blue { color: blue; }
+&lt;/style&gt;
+&lt;p class=&quot;blue&quot;&gt;Internal style&lt;/p&gt;
+
+&lt;!-- 3. External file (best ✅) --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div></div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>CSS syntax</h1>
+<div class="demo">
+<pre><code class="language-css">h1 {
+  color: purple;
+  font-size: 40px;
+}</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;style&gt;h1 {
+  color: purple;
+  font-size: 40px;
+}
+&lt;/style&gt;
+&lt;h1&gt;Hello CSS!&lt;/h1&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>Pattern: <code>selector { property: value; }</code></p>
+<ul>
+<li><strong>Selector</strong> = what to style</li>
+<li><strong>Property</strong> = what to change</li>
+<li><strong>Value</strong> = how to change it</li>
+<li>Don&#39;t forget the <code>;</code></li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Selectors</h1>
+<pre><code class="language-css">p { }               /* every &lt;p&gt; */
+.card { }           /* class=&quot;card&quot; */
+#hero { }           /* id=&quot;hero&quot; */
+nav a { }           /* &lt;a&gt; inside &lt;nav&gt; */
+h1, h2 { }          /* both */
+a:hover { }         /* when the mouse is over it */
+li:first-child { }  /* first item */
+input:focus { }     /* when clicked into */
+</code></pre>
+<p><strong>Specificity</strong> (who wins): inline &gt; <code>#id</code> &gt; <code>.class</code> &gt; <code>tag</code></p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Colours</h1>
+<div class="demo">
+<pre><code class="language-css">.name { color: red; }
+.hex  { color: #8b5cf6; }
+.rgb  { color: rgb(16, 185, 129); }
+.see  { color: rgba(0, 0, 0, 0.35); }
+.grad { background: linear-gradient(to right, #a78bfa, #f472b6); }</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;style&gt;.name { color: red; }
+.hex  { color: #8b5cf6; }
+.rgb  { color: rgb(16, 185, 129); }
+.see  { color: rgba(0, 0, 0, 0.35); }
+.grad { background: linear-gradient(to right, #a78bfa, #f472b6); }
+&lt;/style&gt;
+&lt;style&gt;p { font-size: 22px; font-weight: 700; margin: 6px 0; padding: 6px; }&lt;/style&gt;
+&lt;p class=&quot;name&quot;&gt;red (a name)&lt;/p&gt;
+&lt;p class=&quot;hex&quot;&gt;#8b5cf6 (hex)&lt;/p&gt;
+&lt;p class=&quot;rgb&quot;&gt;rgb(16, 185, 129)&lt;/p&gt;
+&lt;p class=&quot;see&quot;&gt;rgba: 35% visible&lt;/p&gt;
+&lt;p class=&quot;grad&quot;&gt;linear-gradient&lt;/p&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>🎨 Pick colours from your <strong>Figma</strong> design, or use <a href="https://coolors.co">coolors.co</a></p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Text and fonts</h1>
+<div class="demo">
+<pre><code class="language-css">body {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #333;
+}
+h1 {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;style&gt;body {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #333;
+}
+h1 {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+&lt;/style&gt;
+&lt;h1&gt;My Blog&lt;/h1&gt;
+&lt;p&gt;This paragraph uses a serif font, comfy line spacing, and dark grey text.&lt;/p&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>Free fonts: <a href="https://fonts.google.com">fonts.google.com</a>. Copy the <code>&lt;link&gt;</code> into your <code>&lt;head&gt;</code>.</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>The box model 📦</h1>
+<p>Every element is a box:</p>
+<pre><code>┌─────────── margin ───────────┐
+│  ┌──────── border ────────┐  │
+│  │  ┌───── padding ────┐  │  │
+│  │  │     content      │  │  │
+│  │  └──────────────────┘  │  │
+│  └────────────────────────┘  │
+└──────────────────────────────┘
+</code></pre>
+<div class="demo">
+<pre><code class="language-css">.card {
+  padding: 20px;        /* space inside */
+  border: 4px solid #a78bfa;
+  margin: 16px;         /* space outside */
+  border-radius: 12px;  /* rounded corners */
+}</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;style&gt;.card {
+  padding: 20px;        /* space inside */
+  border: 4px solid #a78bfa;
+  margin: 16px;         /* space outside */
+  border-radius: 12px;  /* rounded corners */
+}
+&lt;/style&gt;
+&lt;style&gt;body { background: #fde68a; margin: 0; padding: 1px; } .card { background: white; }&lt;/style&gt;
+&lt;div class=&quot;card&quot;&gt;I'm a card. Yellow = margin, purple = border, white = padding + content.&lt;/div&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>Always add <code>* { box-sizing: border-box; }</code> at the top of your CSS.</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Sizes and units</h1>
+<table>
+<thead>
+<tr>
+<th>Unit</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>px</code></td>
+<td>Fixed pixels</td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td>Percent of the parent</td>
+</tr>
+<tr>
+<td><code>rem</code></td>
+<td>Relative to the root font size (1rem ≈ 16px) ✅ good for text</td>
+</tr>
+<tr>
+<td><code>vw</code> / <code>vh</code></td>
+<td>Percent of the screen width / height</td>
+</tr>
+</tbody></table>
+<pre><code class="language-css">.hero { height: 100vh; }
+.container { max-width: 1000px; margin: 0 auto; }  /* centred */
+</code></pre>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Making things look modern ✨</h1>
+<div class="demo">
+<pre><code class="language-css">.card {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s;
+}
+.card:hover { transform: translateY(-5px); }
+button { cursor: pointer; }</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;style&gt;.card {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s;
+}
+.card:hover { transform: translateY(-5px); }
+button { cursor: pointer; }
+&lt;/style&gt;
+&lt;style&gt;body { background: #f3f0ff; padding: 10px; } button { background: #8b5cf6; color: white; border: 0; padding: 8px 16px; border-radius: 8px; }&lt;/style&gt;
+&lt;div class=&quot;card&quot;&gt;&lt;h3&gt;Hover over me ✨&lt;/h3&gt;&lt;button&gt;Follow&lt;/button&gt;&lt;/div&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div></div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>A sneak peek at next week: layout</h1>
+<div class="demo">
+<pre><code class="language-css">.row {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;style&gt;.row {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+&lt;/style&gt;
+&lt;style&gt;.row div { background: #c4b5fd; padding: 20px; border-radius: 10px; font-weight: 700; }&lt;/style&gt;
+&lt;div class=&quot;row&quot;&gt;&lt;div&gt;One&lt;/div&gt;&lt;div&gt;Two&lt;/div&gt;&lt;div&gt;Three&lt;/div&gt;&lt;/div&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div><p>Next Friday: <strong>Flexbox, Grid, and responsive design</strong> (turning your Figma design into code)</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>🛠️ Build time: About Me page</h1>
+<ol>
+<li>Create <code>my-site/index.html</code> and <code>my-site/style.css</code></li>
+<li>Add a <code>header</code> with your name and a <code>nav</code></li>
+<li>Add <code>main</code> with a photo, a bio, and a list of hobbies</li>
+<li>Add a contact <code>form</code></li>
+<li>Add a <code>footer</code> with ©</li>
+<li>Style it: a font, colours, padding, rounded corners, a hover effect</li>
+</ol>
+<p><strong>Write it by hand first.</strong> Then ask AI: &quot;How can I improve this design?&quot;</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>🤖 Good AI prompts for today</h1>
+<blockquote>
+<p>&quot;Explain what each tag in this HTML does, line by line.&quot;</p>
+</blockquote>
+<blockquote>
+<p>&quot;My image isn&#39;t showing. Here&#39;s my folder structure and code: …&quot;</p>
+</blockquote>
+<blockquote>
+<p>&quot;Make this page use semantic HTML and tell me what you changed.&quot;</p>
+</blockquote>
+<blockquote>
+<p>&quot;Suggest a colour palette for a calm personal portfolio.&quot;</p>
+</blockquote>
+<p>Always <strong>read</strong> what the AI changed. You&#39;re the director 🎬</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Homework 📚</h1>
+<ul>
+<li>⌨️ Typing: <strong>10 min a day</strong>. Write down your best WPM</li>
+<li>🏠 Finish the <strong>About Me page</strong> by hand:<ul>
+<li>Semantic tags (<code>header</code>, <code>nav</code>, <code>main</code>, <code>footer</code>)</li>
+<li>Photo with <code>alt</code>, bio, hobbies list, link, contact form</li>
+<li>At least <strong>8 CSS properties</strong> + a <code>:hover</code> effect</li>
+</ul>
+</li>
+<li>⭐ Bonus: add a <code>&lt;details&gt;</code> FAQ and a <code>&lt;table&gt;</code> of your favourite things</li>
+<li>⭐ Bonus: ask AI to improve the design, compare it with yours, and learn 2 new things</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Recap 🧠</h1>
+<ol>
+<li><strong>HTML</strong> = structure, <strong>CSS</strong> = style</li>
+<li>Use <strong>semantic tags</strong> and always add <code>alt</code> and <code>label</code></li>
+<li>Every element is a <strong>box</strong>: padding, border, margin</li>
+</ol>
+<h3>See you next Friday! 🧙‍♀️</h3>
+</div></section>
+<section class="slide" data-part="practice"><div class="content"><h1>🛠️ Practice: HTML and CSS (9 October)</h1>
+<p>Work through these in order. Each exercise has a ⏱️ time guide. <strong>Write the code by hand. No AI until the 🤖 exercises.</strong></p>
+<p>Open <code>starter/index.html</code> in your editor and in your browser. Save your work and refresh the browser to see changes.</p>
+</div></section>
+<section class="slide title" data-part="practice"><div class="content"><h2>🟢 Level 1: Warm-up (in class)</h2>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="3"><div class="content"><h3>1.1 Hello page ⏱️ 3 min</h3>
+<p>Create <code>hello.html</code> from scratch (type <code>!</code> then press Tab). Add:</p>
+<ul>
+<li>A <code>&lt;title&gt;</code> with your name</li>
+<li>An <code>&lt;h1&gt;</code> saying &quot;Hello, I&#39;m ___&quot;</li>
+<li>Two <code>&lt;p&gt;</code> paragraphs about you</li>
+</ul>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="3"><div class="content"><h3>1.2 Text formatting ⏱️ 3 min</h3>
+<p>In one paragraph, use <code>&lt;strong&gt;</code>, <code>&lt;em&gt;</code>, and <code>&lt;br&gt;</code>. Add an <code>&lt;hr&gt;</code> between your two paragraphs.</p>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="3"><div class="content"><h3>1.3 Links ⏱️ 3 min</h3>
+<p>Add 3 links:</p>
+<ul>
+<li>One to your favourite website, opening in a <strong>new tab</strong></li>
+<li>One <code>mailto:</code> email link</li>
+<li>One that jumps to a section further down the page (<code>href=&quot;#hobbies&quot;</code> and <code>id=&quot;hobbies&quot;</code>)</li>
+</ul>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="3"><div class="content"><h3>1.4 Images ⏱️ 3 min</h3>
+<ul>
+<li>Add an image from <code>https://picsum.photos/400</code> with a good <code>alt</code> text</li>
+<li>Make an <code>images</code> folder, put a photo in it, and show it with <code>src=&quot;images/yourphoto.jpg&quot;</code></li>
+</ul>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="3"><div class="content"><h3>1.5 Lists ⏱️ 3 min</h3>
+<ul>
+<li>An unordered list of 3 hobbies</li>
+<li>An ordered list of your morning routine</li>
+<li>A <strong>nested</strong> list: &quot;Food&quot; with sub-items &quot;Breakfast&quot; and &quot;Lunch&quot;</li>
+</ul>
+</div></section>
+<section class="slide title" data-part="practice"><div class="content"><h2>🟡 Level 2: Structure (in class)</h2>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="5"><div class="content"><h3>2.1 Fix the broken code 🐛 ⏱️ 5 min</h3>
+<p>Find <strong>6 mistakes</strong> in this code:</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;My Page&lt;/title&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Welcome&lt;/h2&gt;
+    &lt;p&gt;I love &lt;strong&gt;coding&lt;/p&gt;&lt;/strong&gt;
+    &lt;img src=&quot;cat.jpg&quot;&gt;
+    &lt;a href=google.com&gt;Google&lt;/a&gt;
+    &lt;ul&gt;
+      &lt;li&gt;One
+      &lt;li&gt;Two&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<details>
+<summary>Show answers</summary><ol>
+<li><code>&lt;/head&gt;</code> is missing before <code>&lt;body&gt;</code></li>
+<li><code>&lt;h1&gt;</code> is closed with <code>&lt;/h2&gt;</code></li>
+<li>Tags close in the wrong order: should be <code>&lt;/strong&gt;&lt;/p&gt;</code></li>
+<li><code>&lt;img&gt;</code> has no <code>alt</code></li>
+<li>The link needs <code>https://</code> and quotes: <code>href=&quot;https://google.com&quot;</code></li>
+<li>The first <code>&lt;li&gt;</code> isn&#39;t closed</li>
+</ol>
+<p>(Bonus: <code>&lt;html&gt;</code> should have <code>lang=&quot;en&quot;</code>, and <code>&lt;meta charset&gt;</code> is missing.)</p>
+</details></div></section>
+<section class="slide" data-part="practice" data-minutes="7"><div class="content"><h3>2.2 Semantic layout ⏱️ 7 min</h3>
+<p>Using <code>starter/index.html</code>, fill in the <code>header</code>, <code>nav</code>, <code>main</code> (with 2 <code>section</code>s), and <code>footer</code>. Make the nav links jump to each section.</p>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="5"><div class="content"><h3>2.3 Table ⏱️ 5 min</h3>
+<p>Make a table of today&#39;s typing scores with the columns <strong>Name | WPM | Accuracy</strong> and 3 rows. Use <code>thead</code>, <code>tbody</code>, and <code>th</code>.</p>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="8"><div class="content"><h3>2.4 Sign-up form ⏱️ 8 min</h3>
+<p>Build a form with:</p>
+<ul>
+<li>Name (required)</li>
+<li>Email (<code>type=&quot;email&quot;</code>, required)</li>
+<li>Password (<code>minlength=&quot;8&quot;</code>)</li>
+<li>Age (<code>type=&quot;number&quot;</code>, min 10, max 99)</li>
+<li>Favourite colour (<code>type=&quot;color&quot;</code>)</li>
+<li>Country (<code>&lt;select&gt;</code> with 3 options)</li>
+<li>Experience: radio buttons for Beginner / Intermediate / Pro</li>
+<li>A checkbox: &quot;I agree to the rules&quot;</li>
+<li>A submit button</li>
+</ul>
+<p>Every input needs a <code>&lt;label&gt;</code>. Test it: try to submit it empty and see what happens.</p>
+</div></section>
+<section class="slide" data-part="practice"><div class="content"><h2>🎨 Level 3: CSS (in class)</h2>
+<p>Use <code>starter/style.css</code>.</p>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="5"><div class="content"><h3>3.1 Colours and fonts ⏱️ 5 min</h3>
+<ul>
+<li>Pick a font from <a href="https://fonts.google.com">fonts.google.com</a> and add it</li>
+<li>Set the page <code>background</code> and text <code>color</code></li>
+<li>Give your <code>h1</code> a different colour and make it centred</li>
+</ul>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="5"><div class="content"><h3>3.2 Box model ⏱️ 5 min</h3>
+<p>Style each <code>section</code> as a <strong>card</strong>: white background, <code>padding: 24px</code>, <code>margin: 20px auto</code>, <code>max-width: 700px</code>, <code>border-radius: 16px</code>, and a <code>box-shadow</code>.</p>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="5"><div class="content"><h3>3.3 Hover effects ⏱️ 5 min</h3>
+<ul>
+<li>Links change colour on <code>:hover</code></li>
+<li>Cards lift up on hover (<code>transform: translateY(-5px)</code> plus <code>transition</code>)</li>
+<li>The button gets <code>cursor: pointer</code> and a hover colour</li>
+</ul>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="10"><div class="content"><h3>3.4 Copy the design 🎯 ⏱️ 10 min</h3>
+<p>Recreate this profile card using only HTML and CSS:</p>
+<div class="demo">
+<pre><code class="language-html">&lt;!-- Your goal: make a card that looks like this →
+     round photo (border-radius: 50%), bold name,
+     grey subtitle, one filled + one outlined button --&gt;</code></pre>
+<div class="result"><div class="result-bar"><i></i><i></i><i></i><span>Result</span></div>
+<iframe class="preview" title="Live result" srcdoc="&lt;!-- Your goal: make a card that looks like this →
+     round photo (border-radius: 50%), bold name,
+     grey subtitle, one filled + one outlined button --&gt;
+
+&lt;style&gt;
+  body { background: #f3f0ff; display: flex; justify-content: center; padding: 10px; }
+  .card { background: white; width: 260px; padding: 24px; border-radius: 16px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,.12); }
+  .card img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; }
+  .card h3 { margin: 10px 0 2px; }
+  .card p { color: #777; margin: 0 0 16px; }
+  .card button { padding: 8px 16px; border-radius: 8px; border: 2px solid #8b5cf6; font-weight: 600; cursor: pointer; }
+  .fill { background: #8b5cf6; color: white; } .outline { background: white; color: #8b5cf6; }
+&lt;/style&gt;
+&lt;div class=&quot;card&quot;&gt;
+  &lt;img src=&quot;https://picsum.photos/id/64/200/200&quot; alt=&quot;Profile photo&quot;&gt;
+  &lt;h3&gt;Esther Tan&lt;/h3&gt;
+  &lt;p&gt;Web Developer in Training&lt;/p&gt;
+  &lt;button class=&quot;fill&quot;&gt;Follow&lt;/button&gt; &lt;button class=&quot;outline&quot;&gt;Message&lt;/button&gt;
+&lt;/div&gt;&lt;style&gt;:where(body){font-family:system-ui,sans-serif;margin:16px;color:#222;font-size:16px}&lt;/style&gt;
+&lt;script&gt;
+addEventListener(&quot;submit&quot;, (e) =&gt; e.preventDefault());
+addEventListener(&quot;click&quot;, (e) =&gt; {
+  const a = e.target.closest(&quot;a[href]&quot;);
+  if (a &amp;&amp; !a.getAttribute(&quot;href&quot;).startsWith(&quot;#&quot;)) { e.preventDefault(); window.open(a.href, &quot;_blank&quot;); }
+});
+const report = () =&gt; parent.postMessage({ previewHeight: document.body.scrollHeight + 32 }, &quot;*&quot;);
+new ResizeObserver(report).observe(document.body);
+addEventListener(&quot;load&quot;, report);
+addEventListener(&quot;message&quot;, (e) =&gt; e.data === &quot;measure&quot; &amp;&amp; report());
+&lt;/script&gt;"></iframe></div>
+</div></div></section>
+<section class="slide title" data-part="practice"><div class="content"><h2>🔴 Level 4: Challenges (for fast finishers)</h2>
+</div></section>
+<section class="slide" data-part="practice"><div class="content"><h3>4.1 FAQ with no JavaScript</h3>
+<p>Make an FAQ section with 3 <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code> questions about yourself.</p>
+</div></section>
+<section class="slide" data-part="practice"><div class="content"><h3>4.2 Keyboard-only test ♿</h3>
+<p>Unplug your mouse (or don&#39;t touch it). Can you use your whole page with <strong>Tab</strong>, <strong>Enter</strong>, and <strong>Space</strong>? Fix anything you can&#39;t reach.</p>
+</div></section>
+<section class="slide" data-part="practice"><div class="content"><h3>4.3 Validator</h3>
+<p>Paste your code into <a href="https://validator.w3.org/#validate_by_input">validator.w3.org/#validate_by_input</a> and fix every error until it shows <strong>0 errors</strong>.</p>
+</div></section>
+<section class="slide" data-part="practice"><div class="content"><h3>4.4 Embed</h3>
+<p>Embed a YouTube video and a Google Map of your city with <code>&lt;iframe&gt;</code>.</p>
+</div></section>
+<section class="slide" data-part="practice"><div class="content"><h3>4.5 Speed round ⚡ (group game)</h3>
+<p>The teacher calls out an element and everyone types it. The first correct answer wins a point.</p>
+<ul>
+<li>&quot;A link to YouTube that opens in a new tab&quot;</li>
+<li>&quot;An image with alt text&quot;</li>
+<li>&quot;An email input that&#39;s required&quot;</li>
+<li>&quot;An ordered list with 3 items&quot;</li>
+<li>&quot;A button that says Send&quot;</li>
+</ul>
+</div></section>
+<section class="slide" data-part="practice"><div class="content"><h2>🤖 Level 5: Vibe coding (end of class, 10 min)</h2>
+<p>Now use AI (Copilot, Cursor, or a free chat), with <strong>your own code</strong> as the starting point.</p>
+<ol>
+<li><strong>Explain:</strong> paste your page and ask <em>&quot;Explain my HTML line by line and point out any mistakes.&quot;</em></li>
+<li><strong>Improve:</strong> <em>&quot;Make my page look more modern. Keep my content and explain every CSS change.&quot;</em></li>
+<li><strong>Compare:</strong> what did the AI do that you didn&#39;t know about? Write down <strong>2 new things you learned</strong> and share them with the group.</li>
+</ol>
+<p>⚠️ If you can&#39;t explain a line the AI wrote, ask it to explain, or delete the line.</p>
+</div></section>
+<section class="slide" data-part="practice"><div class="content"><h2>🏠 Homework</h2>
+<p>Finish your <strong>About Me page</strong> (<code>starter/</code> folder) so it has:</p>
+<ul>
+<li><input disabled="" type="checkbox"> <code>header</code> with your name, and a <code>nav</code> with links to each section</li>
+<li><input disabled="" type="checkbox"> An About section with a photo (with <code>alt</code>) and a bio</li>
+<li><input disabled="" type="checkbox"> A Hobbies section with a list</li>
+<li><input disabled="" type="checkbox"> A typing scores <code>table</code></li>
+<li><input disabled="" type="checkbox"> A contact <code>form</code> with validation</li>
+<li><input disabled="" type="checkbox"> A <code>footer</code> with © 2026</li>
+<li><input disabled="" type="checkbox"> At least 8 CSS properties, cards, and hover effects</li>
+<li><input disabled="" type="checkbox"> 0 errors on the W3C validator</li>
+<li><input disabled="" type="checkbox"> ⭐ Bonus: an FAQ with <code>&lt;details&gt;</code>, the profile card from 3.4</li>
+<li><input disabled="" type="checkbox"> ⌨️ Typing 10 min a day. Bring your best WPM next Friday</li>
+</ul>
+</div></section>
+
+<div class="timer" id="timer">
+  <span>⏱️ <span id="timeLeft">0:00</span></span>
+  <button id="timerBtn">Start</button>
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="bar">
+  <button id="lessonBtn">📖 Lesson</button>
+  <button id="practiceBtn">🛠️ Practice</button>
+  <span class="spacer"></span>
+  <button id="prevBtn">←</button>
+  <span id="counter"></span>
+  <button id="nextBtn">→</button>
+  <button id="fullBtn" title="Fullscreen (F)">⛶</button>
+  <button id="helpBtn" title="Shortcuts (?)">?</button>
+</div>
+
+<div class="help" id="help">
+  <div>
+    <b>Keyboard shortcuts</b><br>
+    → / Space / PageDown: next slide<br>
+    ← / PageUp: previous slide<br>
+    Home / End: first / last slide<br>
+    L: jump to Lesson · P: jump to Practice<br>
+    T: start/pause the exercise timer<br>
+    F: fullscreen · Esc: close this
+  </div>
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll(".slide")];
+  const firstPractice = slides.findIndex((s) => s.dataset.part === "practice");
+  const $ = (id) => document.getElementById(id);
+  let index = 0;
+
+  if (firstPractice === -1) $("practiceBtn").style.display = "none";
+
+  function show(i) {
+    index = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, n) => s.classList.toggle("active", n === index));
+    slides[index].scrollTop = 0;
+    $("counter").textContent = `${index + 1} / ${slides.length}`;
+    $("progress").style.width = `${((index + 1) / slides.length) * 100}%`;
+    const inPractice = slides[index].dataset.part === "practice";
+    $("lessonBtn").classList.toggle("current", !inPractice);
+    $("practiceBtn").classList.toggle("current", inPractice);
+    history.replaceState(null, "", `#${index + 1}`);
+    slides[index].querySelectorAll(".preview").forEach((f) => f.contentWindow.postMessage("measure", "*"));
+    resetTimer();
+  }
+
+  // Exercise timer
+  let remaining = 0, ticking = null;
+  function formatTime(sec) {
+    return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+  }
+  function resetTimer() {
+    clearInterval(ticking);
+    ticking = null;
+    const minutes = Number(slides[index].dataset.minutes || 0);
+    remaining = minutes * 60;
+    $("timer").classList.toggle("show", minutes > 0);
+    $("timer").classList.remove("done");
+    $("timeLeft").textContent = formatTime(remaining);
+    $("timerBtn").textContent = "Start";
+  }
+  function toggleTimer() {
+    if (!$("timer").classList.contains("show")) return;
+    if (ticking) {
+      clearInterval(ticking);
+      ticking = null;
+      $("timerBtn").textContent = "Resume";
+      return;
+    }
+    if (remaining <= 0) return resetTimer();
+    $("timerBtn").textContent = "Pause";
+    ticking = setInterval(() => {
+      remaining--;
+      $("timeLeft").textContent = formatTime(remaining);
+      if (remaining <= 0) {
+        clearInterval(ticking);
+        ticking = null;
+        $("timer").classList.add("done");
+        $("timerBtn").textContent = "Reset";
+      }
+    }, 1000);
+  }
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  }
+
+  $("prevBtn").onclick = () => show(index - 1);
+  $("nextBtn").onclick = () => show(index + 1);
+  $("lessonBtn").onclick = () => show(0);
+  $("practiceBtn").onclick = () => show(firstPractice);
+  $("fullBtn").onclick = toggleFullscreen;
+  $("helpBtn").onclick = () => $("help").classList.add("show");
+  $("help").onclick = () => $("help").classList.remove("show");
+  $("timerBtn").onclick = toggleTimer;
+
+  document.addEventListener("keydown", (e) => {
+    if (e.target.closest("input, textarea, select")) return;
+    const key = e.key;
+    if (["ArrowRight", "PageDown", " "].includes(key)) { e.preventDefault(); show(index + 1); }
+    else if (["ArrowLeft", "PageUp"].includes(key)) { e.preventDefault(); show(index - 1); }
+    else if (key === "Home") show(0);
+    else if (key === "End") show(slides.length - 1);
+    else if (key === "l" || key === "L") show(0);
+    else if ((key === "p" || key === "P") && firstPractice !== -1) show(firstPractice);
+    else if (key === "t" || key === "T") toggleTimer();
+    else if (key === "f" || key === "F") toggleFullscreen();
+    else if (key === "?") $("help").classList.toggle("show");
+    else if (key === "Escape") $("help").classList.remove("show");
+  });
+
+  window.addEventListener("message", (e) => {
+    const height = e.data && e.data.previewHeight;
+    if (!height) return;
+    const frame = [...document.querySelectorAll(".preview")].find((f) => f.contentWindow === e.source);
+    if (frame) frame.style.height = `${Math.min(height, window.innerHeight * 0.6)}px`;
+  });
+
+  const showFromHash = () => show(Number(location.hash.slice(1)) - 1 || 0);
+  window.addEventListener("hashchange", showFromHash);
+  showFromHash();
+</script>
+</body>
+</html>

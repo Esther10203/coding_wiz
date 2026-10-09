@@ -1,0 +1,12 @@
+---
+description: Stats before push
+alwaysApply: true
+---
+
+# Stats before push
+
+When the user asks to **push** (or you are about to `git push`):
+
+1. **Refresh `docs/stats.md`** first (recount folders / files / lines; see "How to refresh" in that file).
+2. **Commit** the updated `docs/stats.md` before pushing (as `docs: refresh repository stats`, or together with the same push's main commit).
+3. Do not push with a stale `docs/stats.md` after a new session or a big change.

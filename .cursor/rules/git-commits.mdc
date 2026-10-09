@@ -1,0 +1,11 @@
+---
+description: Git commits
+alwaysApply: true
+---
+
+# Git commits
+
+- Use plain `git commit -m "type(scope): summary"` with `feat`, `fix`, `docs`, `chore`, or `refactor`.
+- **Never** add AI attribution trailers such as `Co-authored-by: Cursor <cursoragent@cursor.com>` or `Made-with: Cursor`, unless the user explicitly asks for that exact trailer.
+- If such a trailer appears, remove it before pushing.
+- Only commit when the user asks. Do not force-push `main`/`master`.

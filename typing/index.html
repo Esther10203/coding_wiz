@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coding Wizards – Typing Practice</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #1e1b2e;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    h1 { margin-bottom: 4px; }
+    .levels button {
+      background: #3b3561;
+      color: #eee;
+      border: none;
+      padding: 8px 14px;
+      margin: 4px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .levels button.active { background: #a78bfa; color: #1e1b2e; }
+    #prompt {
+      font-family: ui-monospace, monospace;
+      font-size: 24px;
+      max-width: 800px;
+      line-height: 1.6;
+      margin: 30px 0;
+      white-space: pre-wrap;
+    }
+    .ok { color: #4ade80; }
+    .bad { color: #f87171; background: #4c1d1d; }
+    .cursor { border-bottom: 3px solid #a78bfa; }
+    #input {
+      width: 100%;
+      max-width: 800px;
+      font-size: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid #3b3561;
+      background: #2a2640;
+      color: #eee;
+      font-family: ui-monospace, monospace;
+    }
+    #stats { margin-top: 20px; font-size: 20px; }
+    #stats span { color: #a78bfa; font-weight: bold; }
+    .tip { margin-top: 30px; color: #999; max-width: 600px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>🧙 Coding Wizards: Typing Practice</h1>
+  <p>Pick a level, click the box, and start typing. The timer starts on your first key.</p>
+
+  <div class="levels">
+    <button data-level="home">1. Home row</button>
+    <button data-level="words">2. Common words</button>
+    <button data-level="prompts">3. AI prompts</button>
+    <button data-level="code">4. Code symbols</button>
+  </div>
+
+  <div id="prompt"></div>
+  <input id="input" autocomplete="off" spellcheck="false" placeholder="Type here...">
+  <div id="stats">Speed: <span id="wpm">0</span> WPM · Accuracy: <span id="acc">100</span>%</div>
+  <p class="tip">Tip: keep your fingers on <b>A S D F</b> and <b>J K L ;</b>. Feel the bumps on F and J. Don't look at the keyboard. Go for accuracy first, speed comes later.</p>
+
+  <script>
+    const texts = {
+      home: ["asdf jkl; asdf jkl;", "sad lads ask dad", "a flask falls; dad asks", "all lads had salad"],
+      words: [
+        "the quick brown fox jumps over the lazy dog",
+        "make a website that looks clean and simple",
+        "practice a little every day and you will get faster"
+      ],
+      prompts: [
+        "Create a personal homepage with my name, a photo, and three hobbies.",
+        "Make the background dark blue and the text white.",
+        "Add a button that says Hello when I click it.",
+        "Fix the layout so it looks good on a phone."
+      ],
+      code: [
+        "<h1>Hello world</h1>",
+        "<p class=\"intro\">Welcome to my site!</p>",
+        "body { color: white; background: #222; }",
+        "<a href=\"https://example.com\">Click me</a>"
+      ]
+    };
+
+    const promptEl = document.getElementById("prompt");
+    const input = document.getElementById("input");
+    const wpmEl = document.getElementById("wpm");
+    const accEl = document.getElementById("acc");
+    let level = "home", target = "", startTime = null, mistakes = 0, typed = 0;
+
+    function newRound() {
+      const list = texts[level];
+      target = list[Math.floor(Math.random() * list.length)];
+      input.value = "";
+      startTime = null;
+      mistakes = 0;
+      typed = 0;
+      render("");
+      input.focus();
+    }
+
+    function render(value) {
+      promptEl.innerHTML = [...target].map((ch, i) => {
+        const safe = ch.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+        if (i < value.length) return `<span class="${value[i] === ch ? "ok" : "bad"}">${safe}</span>`;
+        if (i === value.length) return `<span class="cursor">${safe}</span>`;
+        return safe;
+      }).join("");
+    }
+
+    input.addEventListener("input", (e) => {
+      const value = input.value;
+      if (!startTime) startTime = Date.now();
+      if (e.inputType && e.inputType.startsWith("insert")) {
+        typed++;
+        const i = value.length - 1;
+        if (value[i] !== target[i]) mistakes++;
+      }
+      render(value);
+
+      const minutes = (Date.now() - startTime) / 60000;
+      wpmEl.textContent = minutes > 0 ? Math.round(value.length / 5 / minutes) : 0;
+      accEl.textContent = typed ? Math.round(((typed - mistakes) / typed) * 100) : 100;
+
+      if (value === target) setTimeout(newRound, 600);
+    });
+
+    document.querySelectorAll(".levels button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".levels button").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        level = btn.dataset.level;
+        newRound();
+      });
+    });
+
+    document.querySelector('[data-level="home"]').classList.add("active");
+    newRound();
+  </script>
+</body>
+</html>
