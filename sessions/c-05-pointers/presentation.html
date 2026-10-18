@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧙 Coding Wizards</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #1e1b2e;
+      color: #ece9f7;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0 0 56px 0;
+      display: none;
+      overflow-y: auto;
+      padding: 48px 7vw;
+    }
+    .slide.active { display: block; animation: fade 0.25s ease; }
+    .slide.title { display: none; }
+    .slide.title.active { display: flex; align-items: center; justify-content: center; text-align: center; }
+    @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .content { max-width: 1100px; margin: 0 auto; font-size: clamp(18px, 1.6vw, 26px); line-height: 1.5; }
+    .slide[data-part="practice"] { background: #17222e; }
+
+    h1 { font-size: 2.2em; margin: 0 0 0.4em; color: #c4b5fd; }
+    h2 { font-size: 1.6em; margin: 0.2em 0 0.5em; color: #c4b5fd; }
+    h3 { font-size: 1.3em; margin: 0.2em 0 0.5em; color: #f9a8d4; }
+    .title h1 { font-size: 3em; }
+    .title h2, .title h3 { color: #ece9f7; font-weight: 400; }
+    .title .content > h2:first-child { font-size: 2.6em; font-weight: 700; }
+    .slide[data-part="practice"] h2, .slide[data-part="practice"] h3 { color: #7dd3fc; }
+
+    a { color: #f9a8d4; }
+    strong { color: #fff; }
+    ul, ol { padding-left: 1.3em; }
+    li { margin: 0.25em 0; }
+
+    code {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      background: #332e4d;
+      padding: 0.1em 0.35em;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #0f0d18;
+      border: 1px solid #332e4d;
+      border-radius: 12px;
+      padding: 18px 22px;
+      overflow-x: auto;
+      font-size: 0.8em;
+      line-height: 1.45;
+    }
+    pre code { background: none; padding: 0; color: #e2e8f0; }
+
+    /* Code + live result side by side */
+    .demo {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+      margin: 0.6em 0;
+    }
+    .demo pre { margin: 0; font-size: 0.72em; }
+    .result {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+    .result-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: #e5e7eb;
+      color: #555;
+      font-size: 13px;
+    }
+    .result-bar i { width: 11px; height: 11px; border-radius: 50%; background: #f87171; }
+    .result-bar i:nth-child(2) { background: #fbbf24; }
+    .result-bar i:nth-child(3) { background: #4ade80; }
+    .result-bar span { margin-left: 8px; }
+    .preview { display: block; width: 100%; height: 120px; border: 0; background: #fff; }
+    @media (max-width: 900px) { .demo { grid-template-columns: 1fr; } }
+
+    .content img {
+      display: block;
+      max-width: 100%;
+      max-height: 58vh;
+      margin: 0.5em auto;
+      object-fit: contain;
+      border-radius: 16px;
+    }
+
+    table { border-collapse: collapse; margin: 0.6em 0; }
+    th, td { border: 1px solid #3b3561; padding: 0.4em 0.9em; text-align: left; }
+    th { background: #2a2640; color: #c4b5fd; }
+
+    blockquote {
+      margin: 0.8em 0;
+      padding: 0.6em 1.2em;
+      border-left: 5px solid #a78bfa;
+      background: #2a2640;
+      border-radius: 0 10px 10px 0;
+    }
+    blockquote p { margin: 0.3em 0; }
+
+    details {
+      background: #22324a;
+      border-radius: 10px;
+      padding: 0.6em 1em;
+      margin: 0.8em 0;
+    }
+    summary { cursor: pointer; font-weight: 600; color: #7dd3fc; }
+
+    /* Bottom bar */
+    .bar {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      background: #15131f;
+      border-top: 1px solid #2a2640;
+      font-size: 15px;
+    }
+    .bar button {
+      background: #2a2640;
+      color: #ece9f7;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .bar button:hover { background: #3b3561; }
+    .bar button.current { background: #a78bfa; color: #15131f; }
+    .bar .spacer { flex: 1; }
+    .progress {
+      position: fixed;
+      left: 0; bottom: 56px;
+      height: 3px;
+      background: linear-gradient(90deg, #a78bfa, #f472b6);
+      transition: width 0.25s;
+    }
+
+    /* Exercise timer */
+    .timer {
+      position: fixed;
+      top: 18px; right: 22px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: #22324a;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-variant-numeric: tabular-nums;
+      font-size: 22px;
+      z-index: 2;
+    }
+    .timer.show { display: flex; }
+    .timer.done { background: #7f1d1d; animation: pulse 1s infinite; }
+    @keyframes pulse { 50% { opacity: 0.6; } }
+    .timer button {
+      background: #7dd3fc;
+      color: #0f172a;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .help {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 3;
+    }
+    .help.show { display: flex; }
+    .help div { background: #2a2640; padding: 30px 40px; border-radius: 16px; line-height: 2; }
+  </style>
+</head>
+<body>
+
+<section class="slide title" data-part="lesson"><div class="content"><h1>🧙 Coding Wizards</h1>
+<h2>C · Lesson 5: Pointers</h2>
+<h3>Intermediate</h3>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Last time</h1>
+<ul>
+<li>An array is a row of boxes, starting at index 0</li>
+<li>A string ends at <code>&#39;\0&#39;</code></li>
+<li>Pass the length with the array</li>
+</ul>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>A pointer holds an address</h1>
+<pre><code class="language-c">int score = 18;
+int *p = &amp;score;
+printf(&quot;%d\n&quot;, *p);
+*p = 20;
+</code></pre>
+<p><code>&amp;</code> takes the address. <code>*</code> follows the address to the value.</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Why scanf needed &amp;</h1>
+<pre><code class="language-c">scanf(&quot;%d&quot;, &amp;n);
+</code></pre>
+<p><code>scanf</code> must know <strong>where</strong> to write. <code>&amp;n</code> is that place.</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>A function can change a variable</h1>
+<pre><code class="language-c">void bump(int *n) {
+    *n = *n + 1;
+}
+
+int x = 3;
+bump(&amp;x);
+</code></pre>
+<p>Without a pointer, <code>bump</code> would only change its own copy.</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>An array name is an address</h1>
+<pre><code class="language-c">int a[3] = {1, 2, 3};
+printf(&quot;%d\n&quot;, *a);
+printf(&quot;%d\n&quot;, *(a + 1));
+</code></pre>
+<p><code>a[1]</code> and <code>*(a + 1)</code> are the same box.</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Try it · 2 min</h1>
+<p>Write <code>void swap(int *a, int *b)</code> and swap 4 and 9. Print both after the call.</p>
+</div></section>
+<section class="slide" data-part="lesson"><div class="content"><h1>Remember</h1>
+<ul>
+<li><code>p</code> is an address. <code>*p</code> is the value there</li>
+<li><code>&amp;x</code> is the address of <code>x</code></li>
+<li>Pass <code>&amp;</code> when a function must change your variable</li>
+</ul>
+</div></section>
+<section class="slide title" data-part="practice"><div class="content"><h1>Practice: Pointers</h1>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="6"><div class="content"><h3>5.1 Address and value ⏱️ 6 min</h3>
+<p>Make <code>int n = 42</code> and <code>int *p = &amp;n</code>. Print <code>n</code>, <code>*p</code>, and change <code>n</code> through <code>*p</code>.</p>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="10"><div class="content"><h3>5.2 Swap ⏱️ 10 min</h3>
+<p>Write <code>void swap(int *a, int *b)</code>. In <code>main</code>, swap two variables and print them before and after.</p>
+<details>
+<summary>Answer shape</summary><pre><code class="language-c">void swap(int *a, int *b) {
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+</code></pre>
+</details></div></section>
+<section class="slide" data-part="practice" data-minutes="10"><div class="content"><h3>5.3 Zero an array ⏱️ 10 min</h3>
+<p>Write <code>void zero_all(int *a, int n)</code> that sets every element to 0. Call it with an array of 4 numbers and print the array after.</p>
+</div></section>
+<section class="slide" data-part="practice" data-minutes="5"><div class="content"><h3>5.4 Explain &amp; ⏱️ 5 min</h3>
+<p>In one sentence, say why <code>scanf(&quot;%d&quot;, n)</code> is wrong and <code>scanf(&quot;%d&quot;, &amp;n)</code> is right.</p>
+</div></section>
+
+<div class="timer" id="timer">
+  <span>⏱️ <span id="timeLeft">0:00</span></span>
+  <button id="timerBtn">Start</button>
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="bar">
+  <button id="lessonBtn">📖 Lesson</button>
+  <button id="practiceBtn">🛠️ Practice</button>
+  <span class="spacer"></span>
+  <button id="prevBtn">←</button>
+  <span id="counter"></span>
+  <button id="nextBtn">→</button>
+  <button id="fullBtn" title="Fullscreen (F)">⛶</button>
+  <button id="helpBtn" title="Shortcuts (?)">?</button>
+</div>
+
+<div class="help" id="help">
+  <div>
+    <b>Keyboard shortcuts</b><br>
+    → / Space / PageDown: next slide<br>
+    ← / PageUp: previous slide<br>
+    Home / End: first / last slide<br>
+    L: jump to Lesson · P: jump to Practice<br>
+    T: start/pause the exercise timer<br>
+    F: fullscreen · Esc: close this
+  </div>
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll(".slide")];
+  const firstPractice = slides.findIndex((s) => s.dataset.part === "practice");
+  const $ = (id) => document.getElementById(id);
+  let index = 0;
+
+  if (firstPractice === -1) $("practiceBtn").style.display = "none";
+
+  function show(i) {
+    index = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, n) => s.classList.toggle("active", n === index));
+    slides[index].scrollTop = 0;
+    $("counter").textContent = `${index + 1} / ${slides.length}`;
+    $("progress").style.width = `${((index + 1) / slides.length) * 100}%`;
+    const inPractice = slides[index].dataset.part === "practice";
+    $("lessonBtn").classList.toggle("current", !inPractice);
+    $("practiceBtn").classList.toggle("current", inPractice);
+    history.replaceState(null, "", `#${index + 1}`);
+    slides[index].querySelectorAll(".preview").forEach((f) => f.contentWindow.postMessage("measure", "*"));
+    resetTimer();
+  }
+
+  // Exercise timer
+  let remaining = 0, ticking = null;
+  function formatTime(sec) {
+    return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+  }
+  function resetTimer() {
+    clearInterval(ticking);
+    ticking = null;
+    const minutes = Number(slides[index].dataset.minutes || 0);
+    remaining = minutes * 60;
+    $("timer").classList.toggle("show", minutes > 0);
+    $("timer").classList.remove("done");
+    $("timeLeft").textContent = formatTime(remaining);
+    $("timerBtn").textContent = "Start";
+  }
+  function toggleTimer() {
+    if (!$("timer").classList.contains("show")) return;
+    if (ticking) {
+      clearInterval(ticking);
+      ticking = null;
+      $("timerBtn").textContent = "Resume";
+      return;
+    }
+    if (remaining <= 0) return resetTimer();
+    $("timerBtn").textContent = "Pause";
+    ticking = setInterval(() => {
+      remaining--;
+      $("timeLeft").textContent = formatTime(remaining);
+      if (remaining <= 0) {
+        clearInterval(ticking);
+        ticking = null;
+        $("timer").classList.add("done");
+        $("timerBtn").textContent = "Reset";
+      }
+    }, 1000);
+  }
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  }
+
+  $("prevBtn").onclick = () => show(index - 1);
+  $("nextBtn").onclick = () => show(index + 1);
+  $("lessonBtn").onclick = () => show(0);
+  $("practiceBtn").onclick = () => show(firstPractice);
+  $("fullBtn").onclick = toggleFullscreen;
+  $("helpBtn").onclick = () => $("help").classList.add("show");
+  $("help").onclick = () => $("help").classList.remove("show");
+  $("timerBtn").onclick = toggleTimer;
+
+  document.addEventListener("keydown", (e) => {
+    if (e.target.closest("input, textarea, select")) return;
+    const key = e.key;
+    if (["ArrowRight", "PageDown", " "].includes(key)) { e.preventDefault(); show(index + 1); }
+    else if (["ArrowLeft", "PageUp"].includes(key)) { e.preventDefault(); show(index - 1); }
+    else if (key === "Home") show(0);
+    else if (key === "End") show(slides.length - 1);
+    else if (key === "l" || key === "L") show(0);
+    else if ((key === "p" || key === "P") && firstPractice !== -1) show(firstPractice);
+    else if (key === "t" || key === "T") toggleTimer();
+    else if (key === "f" || key === "F") toggleFullscreen();
+    else if (key === "?") $("help").classList.toggle("show");
+    else if (key === "Escape") $("help").classList.remove("show");
+  });
+
+  window.addEventListener("message", (e) => {
+    const height = e.data && e.data.previewHeight;
+    if (!height) return;
+    const frame = [...document.querySelectorAll(".preview")].find((f) => f.contentWindow === e.source);
+    if (frame) frame.style.height = `${Math.min(height, window.innerHeight * 0.6)}px`;
+  });
+
+  const showFromHash = () => show(Number(location.hash.slice(1)) - 1 || 0);
+  window.addEventListener("hashchange", showFromHash);
+  showFromHash();
+</script>
+</body>
+</html>

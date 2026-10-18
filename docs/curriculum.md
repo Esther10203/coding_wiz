@@ -224,6 +224,23 @@ Ideas: a class quiz, a recipe sharer, a habit tracker, an event RSVP site, a boo
 - [ ] Draw a system architecture diagram
 - [ ] Use AI agents well: clear prompts, reviewing their code, debugging with them
 
+## C programming track
+
+A separate path, not a replacement for the Friday web classes. Full map: `docs/c-curriculum.md`.
+
+| # | Folder | Level | Topic |
+|---|--------|-------|-------|
+| 1 | `sessions/c-01-hello/` | Beginner | First program, types, `printf` |
+| 2 | `sessions/c-02-decisions/` | Beginner | `if`, `while`, `for` |
+| 3 | `sessions/c-03-functions/` | Beginner | Functions and scope |
+| 4 | `sessions/c-04-arrays/` | Intermediate | Arrays and strings |
+| 5 | `sessions/c-05-pointers/` | Intermediate | Pointers |
+| 6 | `sessions/c-06-memory/` | Intermediate | Structs and `malloc` |
+| 7 | `sessions/c-07-files/` | Advanced | Files and the preprocessor |
+| 8 | `sessions/c-08-expert/` | Expert habits | Modules, headers, careful C |
+
+---
+
 ## After December (2027)
 
 TypeScript → testing → Docker → Linux servers and SSH → cloud (AWS) → CI/CD → data structures and algorithms → interview preparation.
